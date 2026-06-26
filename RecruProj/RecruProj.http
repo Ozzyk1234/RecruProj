@@ -1,0 +1,6 @@
+@RecruProj_HostAddress = http://localhost:5173
+
+GET {{RecruProj_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
