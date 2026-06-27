@@ -53,6 +53,8 @@ namespace RecruProj.Respository.ProjectRepository
                 Title = taskItem.title,
                 Description = taskItem.description,
                 Status = taskItem.status,
+                Priority = taskItem.priority,
+                DueDate = taskItem.dueDate,
                 CreatedAt = DateTime.UtcNow,
                 ProjectId = id
             };
@@ -77,7 +79,7 @@ namespace RecruProj.Respository.ProjectRepository
             return projects;
         }
 
-        public async Task<IEnumerable<GetTaskItemDTO>> GetAllTaskForProjectItems(int projectId)
+        public async Task<IEnumerable<GetProjectsWithTaskDTO>> GetAllTaskForProjectItems(int projectId)
         {
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if(existingproject == null)
@@ -85,18 +87,25 @@ namespace RecruProj.Respository.ProjectRepository
                 throw new Exception("Podane ID projektu nie istnieje.");
             }
 
-            var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId).Select(t => new GetTaskItemDTO(
+            var projectwithtaskitems = await _dbcontext.Projects.Where(x => x.Id == projectId).Select(t => new GetProjectsWithTaskDTO(
                 t.Id,
-                t.Title,
+                t.Name,
                 t.Description,
-                t.Status,
-                t.Priority,
-                t.DueDate
+                t.CreatedAt,
+                t.Tasks.Select(tasks => new GetTaskItemDTO(
+                    tasks.Id,
+                    tasks.Title,
+                    tasks.Description,
+                    tasks.Status,
+                    tasks.Priority,
+                    tasks.DueDate
+                ))
             )).ToListAsync();
-            return TaskItems;
+
+            return projectwithtaskitems;
         }
 
-        public async Task<IEnumerable<GetTaskItemDTO>> GetProjectWithTaskFiltering(int projectId, Status status, Priority priority)
+        public async Task<IEnumerable<GetTaskItemDTO>> GetProjectWithTaskFiltering(int projectId, Status? status, Priority? priority)
         {
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if (existingproject == null)
@@ -104,28 +113,46 @@ namespace RecruProj.Respository.ProjectRepository
                 throw new Exception("Podane ID projektu nie istnieje.");
             }
 
-            var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status && x.Priority == priority).Select(t => new GetTaskItemDTO(
-                t.Id,
-                t.Title,
-                t.Description,
-                t.Status,
-                t.Priority,
-                t.DueDate
-            )).ToListAsync();
-            return TaskItems;
-        }
-
-        public async Task<IEnumerable<GetTaskItemDTO>> GetTaskItemsByStatus(Status status)
-        {
-            var TaskItems = await _dbcontext.TaskItems.Where(x => x.Status == status).Select(t => new GetTaskItemDTO(
-                t.Id,
-                t.Title,
-                t.Description,
-                t.Status,
-                t.Priority,
-                t.DueDate
-            )).ToListAsync();
-            return TaskItems;
+            if(status != null && priority != null)
+            {
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status && x.Priority == priority).Select(t => new GetTaskItemDTO(
+                    t.Id,
+                    t.Title,
+                    t.Description,
+                    t.Status,
+                    t.Priority,
+                    t.DueDate
+                )).ToListAsync();
+                return TaskItems;
+            }
+            else if(status != null)
+            {
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status).Select(t => new GetTaskItemDTO(
+                    t.Id,
+                    t.Title,
+                    t.Description,
+                    t.Status,
+                    t.Priority,
+                    t.DueDate
+                )).ToListAsync();
+                return TaskItems;
+            }
+            else if(priority != null)
+            {
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Priority == priority).Select(t => new GetTaskItemDTO(
+                    t.Id,
+                    t.Title,
+                    t.Description,
+                    t.Status,
+                    t.Priority,
+                    t.DueDate
+                )).ToListAsync();
+                return TaskItems;
+            }
+            else
+            {
+                throw new Exception("Invalid filter values.");
+            }
         }
 
         public async Task<TasksSummaryDTO> GetTasksSummary(int projectId)

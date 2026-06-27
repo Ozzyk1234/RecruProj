@@ -16,7 +16,7 @@ namespace RecruProj.Controllers
     {
         private readonly IProjectRepository _projectRepository;
 
-        public ProjectsController(IProjectRepository projectRepository, ITaskItemRepository taskItemRepository)
+        public ProjectsController(IProjectRepository projectRepository)
         {
             _projectRepository = projectRepository;
         }
@@ -44,7 +44,7 @@ namespace RecruProj.Controllers
             return Ok(result);
         }
         [HttpGet("{projectId}/tasks")]
-        public async Task<ActionResult<IEnumerable<GetTaskItemDTO>>> GetProjectWithTaskFiltering(int projectId, [FromQuery] Status status, [FromQuery] Priority priority)
+        public async Task<ActionResult<IEnumerable<GetTaskItemDTO>>> GetProjectWithTaskFiltering(int projectId, [FromQuery] Status? status, [FromQuery] Priority? priority)
         {
             var result = await _projectRepository.GetProjectWithTaskFiltering(projectId, status, priority);
             if (result == null)
