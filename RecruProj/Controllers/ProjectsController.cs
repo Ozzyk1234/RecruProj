@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using RecruProj.Dtos.ProjectDtos;
 using RecruProj.Dtos.TaskItemDtos;
 using RecruProj.Models.Enums;
 using RecruProj.Models.ProjectsName;
+using RecruProj.Models.TaskItemName;
 using RecruProj.Repository.TaskItemRepository;
 using RecruProj.Respository.ProjectRepository;
 
@@ -15,10 +17,14 @@ namespace RecruProj.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly IProjectRepository _projectRepository;
+        private readonly IValidator<Project> _ProjectValidator;
+        private readonly IValidator<TaskItem> _TaskItemValidator;
 
-        public ProjectsController(IProjectRepository projectRepository)
+        public ProjectsController(IProjectRepository projectRepository, IValidator<Project> projectValidator, IValidator<TaskItem> taskItemValidator)
         {
             _projectRepository = projectRepository;
+            _ProjectValidator = projectValidator;
+            _TaskItemValidator = taskItemValidator;
         }
 
         [HttpGet]
@@ -36,6 +42,16 @@ namespace RecruProj.Controllers
         [HttpPost]
         public async Task<ActionResult<CreateProjectsDTO>> CreateProject([FromBody] CreateProjectsDTO project)
         {
+            var validationResult = await _ProjectValidator.ValidateAsync(new Project
+            {
+                Name = project.name,
+                Description = project.description
+            });
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var result = await _projectRepository.CreateProject(project);
             if (result == null)
             {
@@ -67,6 +83,19 @@ namespace RecruProj.Controllers
         [HttpPost("{projectId}/tasks")]
         public async Task<ActionResult<CreateUpdateTaskItemDTO>> CreateTaskItem(int projectId, [FromBody] CreateUpdateTaskItemDTO taskItem)
         {
+            var validationResult = await _TaskItemValidator.ValidateAsync(new TaskItem
+            {
+                Title = taskItem.title,
+                Description = taskItem.description,
+                Status = taskItem.status,
+                Priority = taskItem.priority,
+                DueDate = taskItem.dueDate
+            });
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var result = await _projectRepository.CreateTaskItem(projectId, taskItem);
             if (result == null)
             {
@@ -88,3 +117,4 @@ namespace RecruProj.Controllers
 
     }
 }
+
