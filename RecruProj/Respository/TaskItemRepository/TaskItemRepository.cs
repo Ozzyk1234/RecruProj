@@ -4,6 +4,7 @@ using RecruProj.Dtos.TaskItemDtos;
 using RecruProj.Models.Enums;
 using RecruProj.Models.TaskItemName;
 using RecruProj.Repository.TaskItemRepository;
+using RecruProj.Validators.GlobalExceptionHandler;
 
 namespace RecruProj.Respository.TaskItemRepository
 {
@@ -21,7 +22,7 @@ namespace RecruProj.Respository.TaskItemRepository
             var deletingitem = await _dbcontext.TaskItems.FirstOrDefaultAsync(t => t.Id == id);
             if (deletingitem == null)
             {
-                throw new Exception("Podane ID nie istnieje.");
+                throw new NotFoundException("Podane ID nie istnieje.");
             }
 
             _dbcontext.TaskItems.Remove(deletingitem);
@@ -36,7 +37,7 @@ namespace RecruProj.Respository.TaskItemRepository
 
             if(findTask == null)
             {
-                throw new Exception("Podane ID nie istnieje.");
+                throw new NotFoundException("Podane ID nie istnieje.");
             }
 
             findTask.Title = taskItem.title;
@@ -56,7 +57,7 @@ namespace RecruProj.Respository.TaskItemRepository
 
             if (findTask == null)
             {
-                throw new Exception("Podane ID nie istnieje.");
+                throw new NotFoundException("Podane ID nie istnieje.");
             }
 
             findTask.Status = status;

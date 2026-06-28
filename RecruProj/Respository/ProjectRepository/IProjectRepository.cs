@@ -12,7 +12,7 @@ namespace RecruProj.Respository.ProjectRepository
         public Task<IEnumerable<GetProjectsDTO>> GetAllProjects();
         public Task<CreateProjectsDTO> CreateProject(CreateProjectsDTO project);
         public Task<IEnumerable<GetTaskItemDTO>> GetProjectWithTaskFiltering(int projectId, Status? status, Priority? priority);
-        public Task<IEnumerable<GetProjectsWithTaskDTO>> GetAllTaskForProjectItems(int projectId);
+        public Task<GetProjectsWithTaskDTO> GetAllTaskForProjectItems(int projectId);
         public Task<CreateUpdateTaskItemDTO> CreateTaskItem(int projectId, CreateUpdateTaskItemDTO taskItem);
         public Task<TasksSummaryDTO> GetTasksSummary(int projectId);
     }

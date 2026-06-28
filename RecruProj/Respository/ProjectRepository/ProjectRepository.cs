@@ -6,6 +6,7 @@ using RecruProj.Models.TaskItemName;
 using RecruProj.Models.Enums;
 using System.Collections;
 using Microsoft.EntityFrameworkCore;
+using RecruProj.Validators.GlobalExceptionHandler;
 
 namespace RecruProj.Respository.ProjectRepository
 {
@@ -24,7 +25,7 @@ namespace RecruProj.Respository.ProjectRepository
 
             if (existingproject != null)
             {
-                throw new Exception("Project with the same name already exists.");
+                throw new ConflictException("Project with the same name already exists.");
             }
             var newProject = new Project
             {
@@ -46,7 +47,7 @@ namespace RecruProj.Respository.ProjectRepository
 
             if (existingTask != null)
             {
-                throw new Exception("Task item with the same title already exists.");
+                throw new ConflictException("Task item with the same title already exists.");
             }
             var newTaskItem = new TaskItem
             {
@@ -79,30 +80,29 @@ namespace RecruProj.Respository.ProjectRepository
             return projects;
         }
 
-        public async Task<IEnumerable<GetProjectsWithTaskDTO>> GetAllTaskForProjectItems(int projectId)
+        public async Task<GetProjectsWithTaskDTO> GetAllTaskForProjectItems(int projectId)
         {
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if(existingproject == null)
             {
-                throw new Exception("Podane ID projektu nie istnieje.");
+                throw new NotFoundException("Podane ID projektu nie istnieje.");
             }
 
-            var projectwithtaskitems = await _dbcontext.Projects.Where(x => x.Id == projectId).Select(t => new GetProjectsWithTaskDTO(
-                t.Id,
-                t.Name,
-                t.Description,
-                t.CreatedAt,
-                t.Tasks.Select(tasks => new GetTaskItemDTO(
-                    tasks.Id,
-                    tasks.Title,
-                    tasks.Description,
-                    tasks.Status,
-                    tasks.Priority,
-                    tasks.DueDate
-                ))
-            )).ToListAsync();
+            return new GetProjectsWithTaskDTO(
+                existingproject.Id,
+                existingproject.Name,
+                existingproject.Description,
+                existingproject.CreatedAt,
+                await _dbcontext.TaskItems.Where(t => t.ProjectId == projectId).Select(t => new GetTaskItemDTO(
+                    t.Id,
+                    t.Title,
+                    t.Description,
+                    t.Status,
+                    t.Priority,
+                    t.DueDate
+                )).ToListAsync()
+            );
 
-            return projectwithtaskitems;
         }
 
         public async Task<IEnumerable<GetTaskItemDTO>> GetProjectWithTaskFiltering(int projectId, Status? status, Priority? priority)
@@ -110,7 +110,7 @@ namespace RecruProj.Respository.ProjectRepository
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if (existingproject == null)
             {
-                throw new Exception("Podane ID projektu nie istnieje.");
+                throw new NotFoundException("Podane ID projektu nie istnieje.");
             }
 
             if(status != null && priority != null)
@@ -151,7 +151,15 @@ namespace RecruProj.Respository.ProjectRepository
             }
             else
             {
-                throw new Exception("Invalid filter values.");
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId).Select(t => new GetTaskItemDTO(
+                    t.Id,
+                    t.Title,
+                    t.Description,
+                    t.Status,
+                    t.Priority,
+                    t.DueDate
+                )).ToListAsync();
+                return TaskItems;
             }
         }
 
@@ -160,7 +168,7 @@ namespace RecruProj.Respository.ProjectRepository
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if (existingproject == null)
             {
-                throw new Exception("Podane ID projektu nie istnieje.");
+                throw new NotFoundException("Podane ID projektu nie istnieje.");
             }
 
             var totalTasks = await _dbcontext.TaskItems.CountAsync(t => t.ProjectId == projectId);

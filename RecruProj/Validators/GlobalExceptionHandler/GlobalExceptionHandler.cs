@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace RecruProj.Validators.GlobalExceptionHandler
 {
@@ -9,16 +11,45 @@ namespace RecruProj.Validators.GlobalExceptionHandler
         {
             this.logger = logger;
         }
-        public ValueTask<bool> TryHandleAsync(
+        public async ValueTask<bool> TryHandleAsync(
             HttpContext httpContext,
             Exception exception,
             CancellationToken cancellationToken)
         {
-            var exceptionMessage = exception.Message;
-            logger.LogError(
-                "Error Message: {exceptionMessage}, Time of occurrence {time}, Status Code: {statusCode}",
-                exceptionMessage, DateTime.UtcNow, httpContext.Response.StatusCode);
-            return ValueTask.FromResult(true);
+            ProblemDetails problem;
+
+            switch(exception)
+            {
+                case ConflictException conflictException:
+                    problem = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status409Conflict,
+                        Title = "Konflikt zasobu. Duplikat",
+                        Detail = conflictException.Message
+                    };
+                    httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                    await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+                    return true;
+                case NotFoundException notFoundException:
+                    problem = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Title = "Zasób nie znaleziony.",
+                        Detail = notFoundException.Message
+                    };
+                    httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                    await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+                    return true;
+                default:
+                    httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    await httpContext.Response.WriteAsJsonAsync(new ProblemDetails
+                    {
+                        Status = StatusCodes.Status500InternalServerError,
+                        Title = "Wystąpił błąd serwera.",
+                        Detail = exception.Message
+                    }, cancellationToken);
+                    return true;
+            }
         }
     }
 }
