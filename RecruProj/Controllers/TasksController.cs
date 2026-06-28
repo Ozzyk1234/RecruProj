@@ -46,14 +46,6 @@ namespace RecruProj.Controllers
         }
         [HttpPatch("{id}/status")]
         public async Task<ActionResult<CreateUpdateTaskItemDTO>> UpdateTaskItemStatus(int id, Status status) {
-            var validationResult = await _validator.ValidateAsync(new TaskItem
-            {
-                Status = status
-            });
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
 
             var result = await _taskItemRepository.UpdateTaskItemStatus(id, status);
 

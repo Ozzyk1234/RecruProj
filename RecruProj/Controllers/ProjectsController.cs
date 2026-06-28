@@ -71,7 +71,7 @@ namespace RecruProj.Controllers
         }
 
         [HttpGet("{projectId}")]
-        public async Task<ActionResult<IEnumerable<GetTaskItemDTO>>> GetAllTaskForProjectItems(int projectId)
+        public async Task<ActionResult<GetProjectsWithTaskDTO>> GetAllTaskForProjectItems(int projectId)
         {
             var result = await _projectRepository.GetAllTaskForProjectItems(projectId);
             if (result == null)
