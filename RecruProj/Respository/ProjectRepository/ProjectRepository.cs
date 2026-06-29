@@ -19,7 +19,7 @@ namespace RecruProj.Respository.ProjectRepository
             _dbcontext = dbcontext;
         }
 
-        public async Task<CreateProjectsDTO> CreateProject(CreateProjectsDTO project)
+        public async Task<CreateProjectsResponseDTO> CreateProject(CreateProjectsDTO project)
         {
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Name == project.name);
 
@@ -38,12 +38,17 @@ namespace RecruProj.Respository.ProjectRepository
             await _dbcontext.SaveChangesAsync();
 
 
-            return project;
+            return new CreateProjectsResponseDTO(
+                newProject.Id,
+                newProject.Name,
+                newProject.Description,
+                newProject.CreatedAt
+            );
         }
 
         public async Task<CreateUpdateTaskItemDTO> CreateTaskItem(int id, CreateUpdateTaskItemDTO taskItem)
         {
-            var existingTask = await _dbcontext.TaskItems.FirstOrDefaultAsync(t => t.Title == taskItem.title);
+            var existingTask = await _dbcontext.TaskItems.Where(t => t.ProjectId == id).FirstOrDefaultAsync(t => t.Title == taskItem.title);
 
             if (existingTask != null)
             {
@@ -105,7 +110,7 @@ namespace RecruProj.Respository.ProjectRepository
 
         }
 
-        public async Task<IEnumerable<GetTaskItemDTO>> GetProjectWithTaskFiltering(int projectId, Status? status, Priority? priority)
+        public async Task<GetTaskItemPagedDTO> GetProjectWithTaskFiltering(int projectId, Status? status, Priority? priority, int pageIndex, int pageSize)
         {
             var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
             if (existingproject == null)
@@ -115,7 +120,7 @@ namespace RecruProj.Respository.ProjectRepository
 
             if(status != null && priority != null)
             {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status && x.Priority == priority).Select(t => new GetTaskItemDTO(
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status && x.Priority == priority).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
                     t.Id,
                     t.Title,
                     t.Description,
@@ -123,11 +128,11 @@ namespace RecruProj.Respository.ProjectRepository
                     t.Priority,
                     t.DueDate
                 )).ToListAsync();
-                return TaskItems;
+                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
             }
             else if(status != null)
             {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status).Select(t => new GetTaskItemDTO(
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
                     t.Id,
                     t.Title,
                     t.Description,
@@ -135,11 +140,11 @@ namespace RecruProj.Respository.ProjectRepository
                     t.Priority,
                     t.DueDate
                 )).ToListAsync();
-                return TaskItems;
+                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
             }
             else if(priority != null)
             {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Priority == priority).Select(t => new GetTaskItemDTO(
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Priority == priority).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
                     t.Id,
                     t.Title,
                     t.Description,
@@ -147,11 +152,11 @@ namespace RecruProj.Respository.ProjectRepository
                     t.Priority,
                     t.DueDate
                 )).ToListAsync();
-                return TaskItems;
+                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
             }
             else
             {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId).Select(t => new GetTaskItemDTO(
+                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
                     t.Id,
                     t.Title,
                     t.Description,
@@ -159,7 +164,7 @@ namespace RecruProj.Respository.ProjectRepository
                     t.Priority,
                     t.DueDate
                 )).ToListAsync();
-                return TaskItems;
+                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
             }
         }
 

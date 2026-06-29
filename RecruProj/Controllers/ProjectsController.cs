@@ -60,9 +60,9 @@ namespace RecruProj.Controllers
             return Ok(result);
         }
         [HttpGet("{projectId}/tasks")]
-        public async Task<ActionResult<IEnumerable<GetTaskItemDTO>>> GetProjectWithTaskFiltering(int projectId, [FromQuery] Status? status, [FromQuery] Priority? priority)
+        public async Task<ActionResult<IEnumerable<GetTaskItemDTO>>> GetProjectWithTaskFiltering(int projectId, [FromQuery] Status? status, [FromQuery] Priority? priority, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _projectRepository.GetProjectWithTaskFiltering(projectId, status, priority);
+            var result = await _projectRepository.GetProjectWithTaskFiltering(projectId, status, priority, pageIndex, pageSize);
             if (result == null)
             {
                 return NotFound();
