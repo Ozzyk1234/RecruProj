@@ -110,62 +110,44 @@ namespace RecruProj.Respository.ProjectRepository
 
         }
 
-        public async Task<GetTaskItemPagedDTO> GetProjectWithTaskFiltering(int projectId, Status? status, Priority? priority, int pageIndex, int pageSize)
+        public async Task<GetTaskItemPagedDTO> GetProjectWithTaskFiltering(
+            int projectId,
+            Status? status,
+            Priority? priority,
+            int pageIndex,
+            int pageSize)
         {
-            var existingproject = await _dbcontext.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
-            if (existingproject == null)
+            var existingProject = await _dbcontext.Projects
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (existingProject == null)
             {
                 throw new NotFoundException("Podane ID projektu nie istnieje.");
             }
 
-            if(status != null && priority != null)
-            {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status && x.Priority == priority).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
+            var query = _dbcontext.TaskItems
+                .Where(x => x.ProjectId == projectId);
+
+            if (status.HasValue)
+                query = query.Where(x => x.Status == status.Value);
+
+            if (priority.HasValue)
+                query = query.Where(x => x.Priority == priority.Value);
+
+            var taskItems = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(t => new GetTaskItemDTO(
                     t.Id,
                     t.Title,
                     t.Description,
                     t.Status,
                     t.Priority,
                     t.DueDate
-                )).ToListAsync();
-                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
-            }
-            else if(status != null)
-            {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Status == status).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
-                    t.Id,
-                    t.Title,
-                    t.Description,
-                    t.Status,
-                    t.Priority,
-                    t.DueDate
-                )).ToListAsync();
-                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
-            }
-            else if(priority != null)
-            {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId && x.Priority == priority).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
-                    t.Id,
-                    t.Title,
-                    t.Description,
-                    t.Status,
-                    t.Priority,
-                    t.DueDate
-                )).ToListAsync();
-                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
-            }
-            else
-            {
-                var TaskItems = await _dbcontext.TaskItems.Where(x => x.ProjectId == projectId).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(t => new GetTaskItemDTO(
-                    t.Id,
-                    t.Title,
-                    t.Description,
-                    t.Status,
-                    t.Priority,
-                    t.DueDate
-                )).ToListAsync();
-                return new GetTaskItemPagedDTO(TaskItems, pageIndex, pageSize);
-            }
+                ))
+                .ToListAsync();
+
+            return new GetTaskItemPagedDTO(taskItems, pageIndex, pageSize);
         }
 
         public async Task<TasksSummaryDTO> GetTasksSummary(int projectId)
