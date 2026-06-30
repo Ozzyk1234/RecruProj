@@ -134,6 +134,8 @@ namespace RecruProj.Respository.ProjectRepository
             if (priority.HasValue)
                 query = query.Where(x => x.Priority == priority.Value);
 
+            var totalCount = await query.CountAsync();
+
             var taskItems = await query
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
@@ -147,7 +149,7 @@ namespace RecruProj.Respository.ProjectRepository
                 ))
                 .ToListAsync();
 
-            return new GetTaskItemPagedDTO(taskItems, pageIndex, pageSize);
+            return new GetTaskItemPagedDTO(taskItems, pageIndex, pageSize, totalCount);
         }
 
         public async Task<TasksSummaryDTO> GetTasksSummary(int projectId)

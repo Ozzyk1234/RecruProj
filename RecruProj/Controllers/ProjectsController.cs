@@ -42,11 +42,7 @@ namespace RecruProj.Controllers
         [HttpPost]
         public async Task<ActionResult<CreateProjectsDTO>> CreateProject([FromBody] CreateProjectsDTO project)
         {
-            var validationResult = await _ProjectValidator.ValidateAsync(new Project
-            {
-                Name = project.name,
-                Description = project.description
-            });
+            var validationResult = await _ProjectValidator.ValidateAsync(project);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
