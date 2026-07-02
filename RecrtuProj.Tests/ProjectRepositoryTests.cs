@@ -25,8 +25,7 @@ public class ProjectRepositoryTests
         //Arrange
         var project = new CreateProjectsDTO(
             "Test Project",
-            "Test Description",
-            DateTime.UtcNow);
+            "Test Description");
 
         //Act
 
