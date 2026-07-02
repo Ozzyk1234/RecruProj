@@ -9,6 +9,7 @@ using RecruProj.Repository.TaskItemRepository;
 using RecruProj.Respository.ProjectRepository;
 using RecruProj.Respository.TaskItemRepository;
 using RecruProj.Validators.GlobalExceptionHandler;
+using RecruProj.Validators.PaginationValidator;
 using RecruProj.Validators.ProjectValidator;
 using RecruProj.Validators.TaskItemValidator;
 using System.Text.Json.Serialization;

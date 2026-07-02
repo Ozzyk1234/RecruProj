@@ -136,6 +136,8 @@ namespace RecruProj.Respository.ProjectRepository
 
             var totalCount = await query.CountAsync();
 
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
             var taskItems = await query
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
@@ -149,7 +151,7 @@ namespace RecruProj.Respository.ProjectRepository
                 ))
                 .ToListAsync();
 
-            return new GetTaskItemPagedDTO(taskItems, pageIndex, pageSize, totalCount);
+            return new GetTaskItemPagedDTO(taskItems, pageIndex, pageSize, totalCount, totalPages);
         }
 
         public async Task<TasksSummaryDTO> GetTasksSummary(int projectId)

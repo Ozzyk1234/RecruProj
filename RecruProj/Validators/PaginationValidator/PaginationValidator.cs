@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using RecruProj.Dtos.TaskItemDtos;
 
-namespace RecruProj.Validators.TaskItemValidator
+namespace RecruProj.Validators.PaginationValidator
 {
     public class PaginationValidator : AbstractValidator<PaginationValidatorDTO>
     {
