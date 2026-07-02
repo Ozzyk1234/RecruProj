@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="RecrtuProj.Tests/RecrtuProj.Tests.csproj" Id="fd3e409d-30d9-4f24-84f4-d936027f2ee8" />
   <Project Path="RecruProj/RecruProj.csproj" />
 </Solution>

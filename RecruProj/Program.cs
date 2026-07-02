@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RecruProj.Data;
 using RecruProj.Dtos.ProjectDtos;
+using RecruProj.Dtos.TaskItemDtos;
 using RecruProj.Models.ProjectsName;
 using RecruProj.Models.TaskItemName;
 using RecruProj.Repository.TaskItemRepository;
@@ -25,7 +26,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskItemRepository, TaskItemRepository>();
 builder.Services.AddScoped<IValidator<CreateProjectsDTO>, ProjectValidator>();
-builder.Services.AddScoped<IValidator<TaskItem>, TaskItemValidator>();
+builder.Services.AddScoped<IValidator<CreateUpdateTaskItemDTO>, TaskItemValidator>();
+builder.Services.AddScoped<IValidator<PaginationValidatorDTO>, PaginationValidator>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

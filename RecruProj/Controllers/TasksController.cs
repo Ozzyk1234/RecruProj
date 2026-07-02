@@ -13,9 +13,9 @@ namespace RecruProj.Controllers
     public class TasksController : ControllerBase
     {
         private readonly ITaskItemRepository _taskItemRepository;
-        private readonly IValidator<TaskItem> _validator;
+        private readonly IValidator<CreateUpdateTaskItemDTO> _validator;
 
-        public TasksController(ITaskItemRepository taskItemRepository, IValidator<TaskItem> validator)
+        public TasksController(ITaskItemRepository taskItemRepository, IValidator<CreateUpdateTaskItemDTO> validator)
         {
             _taskItemRepository = taskItemRepository;
             _validator = validator;
@@ -24,14 +24,7 @@ namespace RecruProj.Controllers
 
         [HttpPut("{id}")]
         public async Task<ActionResult<CreateUpdateTaskItemDTO>> UpdateTaskItem(int id, CreateUpdateTaskItemDTO taskItem) {
-            var validationResult = await _validator.ValidateAsync(new TaskItem
-            {
-                Title = taskItem.title,
-                Description = taskItem.description,
-                Status = taskItem.status,
-                Priority = taskItem.priority,
-                DueDate = taskItem.dueDate
-            });
+            var validationResult = await _validator.ValidateAsync(taskItem);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);

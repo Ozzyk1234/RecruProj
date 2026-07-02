@@ -17,14 +17,16 @@ namespace RecruProj.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly IProjectRepository _projectRepository;
-        private readonly IValidator<Project> _ProjectValidator;
-        private readonly IValidator<TaskItem> _TaskItemValidator;
+        private readonly IValidator<CreateProjectsDTO> _ProjectValidator;
+        private readonly IValidator<CreateUpdateTaskItemDTO> _TaskItemValidator;
+        private readonly IValidator<PaginationValidatorDTO> _PaginationValidator;
 
-        public ProjectsController(IProjectRepository projectRepository, IValidator<Project> projectValidator, IValidator<TaskItem> taskItemValidator)
+        public ProjectsController(IProjectRepository projectRepository, IValidator<CreateProjectsDTO> projectValidator, IValidator<CreateUpdateTaskItemDTO> taskItemValidator, IValidator<PaginationValidatorDTO> paginationValidator)
         {
             _projectRepository = projectRepository;
             _ProjectValidator = projectValidator;
             _TaskItemValidator = taskItemValidator;
+            _PaginationValidator = paginationValidator;
         }
 
         [HttpGet]
@@ -56,8 +58,15 @@ namespace RecruProj.Controllers
             return Ok(result);
         }
         [HttpGet("{projectId}/tasks")]
-        public async Task<ActionResult<IEnumerable<GetTaskItemDTO>>> GetProjectWithTaskFiltering(int projectId, [FromQuery] Status? status, [FromQuery] Priority? priority, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<GetTaskItemPagedDTO>> GetProjectWithTaskFiltering(int projectId, [FromQuery] Status? status, [FromQuery] Priority? priority, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
+            PaginationValidatorDTO paginationDTO = new PaginationValidatorDTO(pageIndex, pageSize);
+            var validation = await _PaginationValidator.ValidateAsync(paginationDTO);
+            if(!validation.IsValid)
+            {
+                return BadRequest(validation.Errors);
+            }
+
             var result = await _projectRepository.GetProjectWithTaskFiltering(projectId, status, priority, pageIndex, pageSize);
             if (result == null)
             {
@@ -79,14 +88,7 @@ namespace RecruProj.Controllers
         [HttpPost("{projectId}/tasks")]
         public async Task<ActionResult<CreateUpdateTaskItemDTO>> CreateTaskItem(int projectId, [FromBody] CreateUpdateTaskItemDTO taskItem)
         {
-            var validationResult = await _TaskItemValidator.ValidateAsync(new TaskItem
-            {
-                Title = taskItem.title,
-                Description = taskItem.description,
-                Status = taskItem.status,
-                Priority = taskItem.priority,
-                DueDate = taskItem.dueDate
-            });
+            var validationResult = await _TaskItemValidator.ValidateAsync(taskItem);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);

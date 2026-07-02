@@ -13,6 +13,7 @@ namespace RecruProj.Validators.ProjectValidator
             RuleFor(p => p.description)
                 .MaximumLength(500).WithMessage("Project description cannot exceed 500 characters.");
 
+
         }
     }
 }
