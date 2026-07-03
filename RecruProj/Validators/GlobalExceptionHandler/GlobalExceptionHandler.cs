@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RecruProj.Validators.CustomExceptions;
 
 namespace RecruProj.Validators.GlobalExceptionHandler
 {

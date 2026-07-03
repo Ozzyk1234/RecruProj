@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using RecruProj.Data;
 using RecruProj.Dtos.ProjectDtos;
 using RecruProj.Respository.ProjectRepository;
+using RecruProj.Validators.CustomExceptions;
+
+namespace RecrtuProj.Tests;
 
 public class ProjectRepositoryTests
 {
@@ -37,5 +40,25 @@ public class ProjectRepositoryTests
         Assert.Equal("Test Project", result.name);
         Assert.Equal("Test Description", result.description);
         Assert.Equal(DateTime.UtcNow.Date, result.createdAt.Date);
+    }
+    [Fact]
+    public async Task CreateProject_ShouldThrowConflictException_WhenProjectNameAlreadyExists()
+    {
+        //Arrange
+        var project = new CreateProjectsDTO(
+            "Test Project",
+            "Test Description");
+        var project2 = new CreateProjectsDTO(
+            "Test Project",
+            "Test Description");
+
+        //Act
+
+        await _repository.CreateProject(project);
+
+
+        //Assert
+        await Assert.ThrowsAsync<ConflictException>(async () => await _repository.CreateProject(project2));
+
     }
 }

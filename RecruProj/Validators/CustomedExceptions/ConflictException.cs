@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace RecruProj.Validators.GlobalExceptionHandler
+namespace RecruProj.Validators.CustomExceptions
 {
     public class ConflictException : Exception
     {

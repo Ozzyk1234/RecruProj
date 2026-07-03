@@ -4,6 +4,7 @@ using RecruProj.Dtos.TaskItemDtos;
 using RecruProj.Models.Enums;
 using RecruProj.Models.TaskItemName;
 using RecruProj.Repository.TaskItemRepository;
+using RecruProj.Validators.CustomExceptions;
 using RecruProj.Validators.GlobalExceptionHandler;
 
 namespace RecruProj.Respository.TaskItemRepository

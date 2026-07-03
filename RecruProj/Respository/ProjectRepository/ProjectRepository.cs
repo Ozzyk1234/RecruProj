@@ -6,7 +6,7 @@ using RecruProj.Models.TaskItemName;
 using RecruProj.Models.Enums;
 using System.Collections;
 using Microsoft.EntityFrameworkCore;
-using RecruProj.Validators.GlobalExceptionHandler;
+using RecruProj.Validators.CustomExceptions;
 
 namespace RecruProj.Respository.ProjectRepository
 {
